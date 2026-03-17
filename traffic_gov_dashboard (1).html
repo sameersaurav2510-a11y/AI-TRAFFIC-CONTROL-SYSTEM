@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrafficAI Gov — Smart City Command Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+/* ══════════ TOKENS ══════════ */
+:root {
+  --bg:       #f0f4ff;
+  --surface:  #ffffff;
+  --surface2: #f7f9ff;
+  --border:   #e2e8f8;
+  --shadow:   0 2px 16px rgba(67,97,238,.07);
+  --shadow-lg:0 8px 40px rgba(67,97,238,.13);
+  --blue:     #4361ee;
+  --blue-lt:  #eef1fd;
+  --sky:      #4cc9f0;
+  --red:      #f72585;
+  --red-lt:   #fff0f7;
+  --amber:    #fb8500;
+  --amber-lt: #fff7ed;
+  --green:    #06d6a0;
+  --green-lt: #edfff9;
+  --purple:   #7b2d8b;
+  --purple-lt:#f7eeff;
+  --text:     #1e2a4a;
+  --text2:    #64748b;
+  --text3:    #94a3b8;
+  --sidebar-w:230px;
+  --header-h: 60px;
+}
+[data-theme="dark"] {
+  --bg:       #0f172a;
+  --surface:  #1e293b;
+  --surface2: #162032;
+  --border:   #1e3a5f;
+  --shadow:   0 2px 16px rgba(0,0,0,.3);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.4);
+  --blue:     #5a7fff;
+  --blue-lt:  #1a2a4a;
+  --red:      #ff4d8d;
+  --red-lt:   #2a0f1e;
+  --amber:    #ffa040;
+  --amber-lt: #2a1800;
+  --green:    #00e5a0;
+  --green-lt: #012a20;
+  --purple-lt:#1a0a2a;
+  --text:     #e2e8f0;
+  --text2:    #94a3b8;
+  --text3:    #475569;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
+
+/* ══════════ LOGIN ══════════ */
+#login-screen{position:fixed;inset:0;z-index:2000;display:flex;background:linear-gradient(135deg,#e8eeff,#f5f0ff,#e0f7fa);overflow-y:auto;align-items:stretch;}
+[data-theme="dark"] #login-screen{background:linear-gradient(135deg,#0a0f1e,#12082a,#081520);}
+.login-left{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:48px 40px;position:relative;overflow:hidden;}
+.login-left::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(67,97,238,.12),transparent 70%),radial-gradient(ellipse 60% 80% at 80% 80%,rgba(76,201,240,.1),transparent 70%);pointer-events:none;}
+.l-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+.l-logo-icon{width:60px;height:60px;background:linear-gradient(135deg,var(--blue),var(--sky));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 12px 32px rgba(67,97,238,.35);animation:float 4s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.l-brand{font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;color:var(--text);letter-spacing:-1px;}
+.l-brand span{color:var(--blue);}
+.l-tagline{font-size:15px;color:var(--text2);text-align:center;margin-bottom:36px;line-height:1.6;}
+.l-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:380px;}
+.l-stat{background:var(--surface);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);}
+.l-stat-val{font-family:'Outfit',sans-serif;font-size:24px;font-weight:700;color:var(--blue);}
+.l-stat-lbl{font-size:11px;color:var(--text2);font-weight:500;margin-top:2px;}
+.l-gov-badge{margin-top:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;}
+.login-right{width:440px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--surface);box-shadow:-8px 0 40px rgba(67,97,238,.06);padding:48px 44px;min-height:100%;}
+.l-form{width:100%;}
+.l-greeting{font-family:'Outfit',sans-serif;font-size:26px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.l-sub{font-size:14px;color:var(--text2);margin-bottom:28px;}
+.role-tabs{display:flex;gap:8px;margin-bottom:24px;}
+.role-tab{flex:1;padding:10px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface2);cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);transition:all .2s;text-align:center;}
+.role-tab.active{border-color:var(--blue);background:var(--blue-lt);color:var(--blue);}
+.f-field{margin-bottom:18px;}
+.f-field label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:7px;}
+.f-wrap{position:relative;}
+.f-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text3);pointer-events:none;}
+.f-field input{width:100%;padding:12px 16px 12px 40px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:all .25s;}
+.f-field input:focus{border-color:var(--blue);background:var(--surface);box-shadow:0 0 0 4px rgba(67,97,238,.1);}
+.f-hint{font-size:11px;color:var(--text3);margin-top:5px;}
+.f-hint::before{content:'💡 ';}
+.l-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--blue),#5a73f0);color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;border:none;border-radius:12px;cursor:pointer;margin-top:20px;transition:all .25s;box-shadow:0 6px 20px rgba(67,97,238,.35);display:flex;align-items:center;justify-content:center;gap:8px;}
+.l-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(67,97,238,.45);}
+.l-err{background:#fff1f5;color:var(--red);border-radius:10px;padding:10px 14px;font-size:13px;margin-top:12px;display:none;text-align:center;}
+.l-divider{border:none;border-top:1px solid var(--border);margin:22px 0;}
+.l-footer{text-align:center;font-size:11px;color:var(--text3);line-height:1.6;}
+
+/* ══════════ APP SHELL ══════════ */
+#app{display:none;min-height:100vh;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(30,42,74,.35);z-index:199;backdrop-filter:blur(2px);}
+.overlay.open{display:block;}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:200;box-shadow:2px 0 16px rgba(67,97,238,.05);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.sb-logo{padding:16px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sb-logo-mark{display:flex;align-items:center;gap:10px;}
+.sb-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--sky));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sb-title{font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.sb-title span{color:var(--blue);}
+.sb-close{display:none;background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);padding:4px;}
+.sb-nav{flex:1;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+.sb-section{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text3);padding:10px 10px 4px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;color:var(--text2);user-select:none;}
+.nav-item:hover{background:var(--blue-lt);color:var(--blue);}
+.nav-item.active{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(67,97,238,.28);}
+.nav-item .ni{font-size:16px;flex-shrink:0;}
+.nav-item .badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;padding:2px 7px;border-radius:99px;font-weight:700;}
+.nav-item.active .badge{background:rgba(255,255,255,.3);}
+.sb-bottom{padding:12px 10px;border-top:1px solid var(--border);}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--surface2);margin-bottom:8px;}
+.u-ava{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--sky));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700;flex-shrink:0;}
+.u-name{font-size:13px;font-weight:600;color:var(--text);}
+.u-role{font-size:10px;color:var(--text3);}
+
+/* Main wrapper */
+.main-wrapper{margin-left:var(--sidebar-w);display:flex;flex-direction:column;min-height:100vh;transition:margin-left .3s;}
+
+/* Header */
+header{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);height:var(--header-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:12px;}
+.h-left{display:flex;align-items:center;gap:12px;}
+.hamburger{display:none;background:none;border:1px solid var(--border);border-radius:8px;padding:7px 9px;cursor:pointer;color:var(--text2);font-size:16px;transition:all .2s;line-height:1;}
+.hamburger:hover{background:var(--blue-lt);color:var(--blue);border-color:var(--blue);}
+.h-title{font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;color:var(--text);white-space:nowrap;}
+.h-right{display:flex;align-items:center;gap:8px;}
+.h-btn{background:none;border:1px solid var(--border);border-radius:9px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.h-btn:hover{background:var(--blue-lt);color:var(--blue);border-color:var(--blue);}
+.h-btn.danger:hover{background:var(--red-lt);color:var(--red);border-color:var(--red);}
+#notif-btn{position:relative;}
+.notif-dot{position:absolute;top:4px;right:10px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--surface);}
+.status-pill{display:flex;align-items:center;gap:6px;background:var(--green-lt);color:#059669;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:600;}
+[data-theme="dark"] .status-pill{color:var(--green);}
+.s-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#clock{font-size:13px;font-weight:700;color:var(--text2);background:var(--surface2);padding:6px 12px;border-radius:99px;border:1px solid var(--border);}
+
+/* Page area */
+.page{display:none;padding:20px;animation:fadein .25s ease;}
+.page.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════ SHARED COMPONENTS ══════════ */
+.panel{background:var(--surface);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.panel-title{font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--text);}
+.live-badge{display:flex;align-items:center;gap:5px;background:var(--green-lt);color:#059669;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;}
+[data-theme="dark"] .live-badge{color:var(--green);}
+.live-badge .s-dot{width:6px;height:6px;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none;font-family:'Plus Jakarta Sans',sans-serif;}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(67,97,238,.3);}
+.btn-primary:hover{background:#3451d1;transform:translateY(-1px);}
+.btn-danger{background:var(--red);color:#fff;box-shadow:0 4px 12px rgba(247,37,133,.3);}
+.btn-danger:hover{background:#d41a6f;transform:translateY(-1px);}
+.btn-success{background:var(--green);color:#fff;box-shadow:0 4px 12px rgba(6,214,160,.3);}
+.btn-success:hover{filter:brightness(1.1);}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text2);}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt);}
+.btn-amber{background:var(--amber);color:#fff;}
+.btn-amber:hover{filter:brightness(1.1);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+
+/* Tags */
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600;}
+.tag-green{background:var(--green-lt);color:#059669;}
+.tag-red{background:var(--red-lt);color:var(--red);}
+.tag-amber{background:var(--amber-lt);color:#b45309;}
+.tag-blue{background:var(--blue-lt);color:var(--blue);}
+[data-theme="dark"] .tag-green{color:var(--green);}
+[data-theme="dark"] .tag-red{color:var(--red);}
+[data-theme="dark"] .tag-amber{color:var(--amber);}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;white-space:nowrap;}
+.tbl th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--text3);text-transform:uppercase;background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);font-weight:500;}
+.tbl tr:hover td{background:var(--blue-lt);}
+.tbl-wrap{overflow:auto;-webkit-overflow-scrolling:touch;}
+
+/* Grid utils */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.g6{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;}
+
+/* KPI card */
+.kpi{background:var(--surface);border-radius:14px;padding:18px;border:1px solid var(--border);box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.kpi.blue::before{background:linear-gradient(90deg,var(--blue),var(--sky));}
+.kpi.green::before{background:linear-gradient(90deg,var(--green),#22d3ee);}
+.kpi.amber::before{background:linear-gradient(90deg,var(--amber),#f59e0b);}
+.kpi.red::before{background:linear-gradient(90deg,var(--red),#e879f9);}
+.kpi.purple::before{background:linear-gradient(90deg,var(--purple),#a855f7);}
+.kpi.sky::before{background:linear-gradient(90deg,var(--sky),#818cf8);}
+.kpi-ico{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px;}
+.kpi.blue .kpi-ico{background:var(--blue-lt);}
+.kpi.green .kpi-ico{background:var(--green-lt);}
+.kpi.amber .kpi-ico{background:var(--amber-lt);}
+.kpi.red .kpi-ico{background:var(--red-lt);}
+.kpi.purple .kpi-ico{background:var(--purple-lt);}
+.kpi.sky .kpi-ico{background:var(--blue-lt);}
+.kpi-val{font-family:'Outfit',sans-serif;font-size:26px;font-weight:700;color:var(--text);line-height:1;margin-bottom:3px;}
+.kpi-lbl{font-size:12px;color:var(--text2);font-weight:500;}
+.kpi-badge{position:absolute;top:14px;right:14px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;}
+.flash{animation:flash .4s ease;}
+@keyframes flash{0%{opacity:1}40%{opacity:.2}100%{opacity:1}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border-radius:18px;padding:28px;width:100%;max-width:520px;box-shadow:0 24px 80px rgba(0,0,0,.2);position:relative;animation:modal-in .25s ease;}
+@keyframes modal-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-title{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:20px;}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:var(--red-lt);color:var(--red);}
+.modal-row{display:flex;gap:10px;margin-top:16px;}
+
+/* Toast */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-lg);font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:10px;min-width:280px;animation:toast-in .3s ease;border-left:4px solid var(--green);}
+.toast.warn{border-left-color:var(--amber);}
+.toast.err{border-left-color:var(--red);}
+@keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══════════ OVERVIEW PAGE ══════════ */
+.section-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:14px;}
+.section-sub{font-size:13px;color:var(--text2);margin-top:-10px;margin-bottom:14px;}
+
+/* chart canvas */
+.chart-box{flex:1;padding:14px;min-height:200px;}
+canvas{display:block;}
+
+/* ══════════ MAP ══════════ */
+#map-container{position:relative;border-radius:0 0 14px 14px;overflow:hidden;height:480px;background:linear-gradient(180deg,#e8f4f8,#d4e8f0);}
+.map-mock{width:100%;height:100%;position:relative;overflow:hidden;}
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(67,97,238,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(67,97,238,.04) 1px,transparent 1px);background-size:40px 40px;}
+.map-road{position:absolute;background:rgba(255,255,255,.7);}
+.map-road.h{height:14px;left:0;right:0;}
+.map-road.v{width:14px;top:0;bottom:0;}
+.map-blip{position:absolute;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;transition:left 3s ease,top 3s ease;}
+.map-blip.car{width:8px;height:8px;background:var(--blue);box-shadow:0 0 0 2px rgba(67,97,238,.2);}
+.map-blip.amb{width:13px;height:13px;background:var(--red);box-shadow:0 0 0 4px rgba(247,37,133,.2);animation:amb-p 1s ease-in-out infinite;z-index:10;}
+@keyframes amb-p{0%,100%{box-shadow:0 0 0 3px rgba(247,37,133,.25)}50%{box-shadow:0 0 0 10px rgba(247,37,133,.06)}}
+.map-blip.patrol{width:11px;height:11px;background:var(--blue);box-shadow:0 0 0 3px rgba(67,97,238,.25);}
+.map-blip.incident{width:16px;height:16px;background:var(--red);border:3px solid #fff;box-shadow:0 0 0 4px var(--red);animation:inc-flash .8s ease-in-out infinite;z-index:11;}
+@keyframes inc-flash{0%,100%{opacity:1;box-shadow:0 0 0 3px var(--red)}50%{opacity:.5;box-shadow:0 0 0 8px rgba(247,37,133,.2)}}
+.map-tooltip{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;box-shadow:var(--shadow-lg);z-index:20;pointer-events:none;white-space:nowrap;display:none;}
+.map-controls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:6px;}
+.map-ctrl-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:var(--shadow);transition:all .2s;}
+.map-ctrl-btn:hover{background:var(--blue-lt);color:var(--blue);}
+.map-legend{position:absolute;bottom:12px;left:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:11px;box-shadow:var(--shadow);}
+.map-leg-item{display:flex;align-items:center;gap:8px;margin-bottom:5px;color:var(--text2);font-weight:500;}
+.map-leg-item:last-child{margin-bottom:0;}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+/* Heatmap overlay */
+.heatmap-cell{position:absolute;border-radius:50%;pointer-events:none;}
+
+/* ══════════ CCTV ══════════ */
+.cctv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px;}
+.cctv-card{border-radius:12px;overflow:hidden;background:#0a1628;position:relative;aspect-ratio:16/9;cursor:pointer;transition:transform .2s,box-shadow .2s;}
+.cctv-card:hover{transform:scale(1.02);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.cctv-feed{width:100%;height:100%;position:relative;overflow:hidden;}
+.cctv-bg{position:absolute;inset:0;background:linear-gradient(180deg,#0d1f3c,#162040);}
+.cctv-road-h{position:absolute;height:30%;background:rgba(40,60,100,.6);left:0;right:0;}
+.cctv-road-v{position:absolute;width:30%;background:rgba(40,60,100,.6);top:0;bottom:0;}
+.cctv-car{position:absolute;width:18px;height:10px;border-radius:3px;transition:left 2s linear,top 2s linear;}
+.cctv-box{position:absolute;border:2px solid;border-radius:3px;font-size:8px;color:#fff;padding:1px 3px;font-family:monospace;}
+.cctv-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:8px;}
+.cctv-header{display:flex;align-items:center;justify-content:space-between;}
+.cctv-id{font-size:10px;color:#0ff;font-family:monospace;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:4px;}
+.cctv-rec{width:8px;height:8px;background:var(--red);border-radius:50%;animation:blink 1.2s infinite;}
+.cctv-footer{display:flex;align-items:center;justify-content:space-between;}
+.cctv-loc{font-size:10px;color:rgba(255,255,255,.7);font-family:monospace;}
+.cctv-ai{font-size:9px;color:#0ff;font-family:monospace;background:rgba(0,100,150,.4);padding:2px 6px;border-radius:4px;}
+.cctv-alert{position:absolute;top:8px;right:8px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:99px;display:none;animation:blink 1s infinite;}
+
+/* ══════════ ALERT POPUP ══════════ */
+#alert-popup{position:fixed;top:80px;right:20px;z-index:900;width:340px;background:var(--surface);border:2px solid var(--red);border-radius:16px;padding:16px;box-shadow:0 8px 40px rgba(247,37,133,.25);display:none;animation:alert-slide .3s ease;}
+@keyframes alert-slide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.alert-popup-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.alert-popup-icon{width:40px;height:40px;background:var(--red-lt);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;animation:shake .5s ease infinite;}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+.alert-popup-title{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
+.alert-popup-sub{font-size:12px;color:var(--text2);}
+
+/* ══════════ AI PANEL ══════════ */
+.ai-bar-wrap{margin-bottom:14px;}
+.ai-bar-label{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px;}
+.ai-bar-track{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--border);}
+.ai-bar-fill{height:100%;border-radius:99px;transition:width .8s ease;}
+.ai-zone-card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;transition:all .2s;cursor:default;}
+.ai-zone-card:hover{background:var(--surface2);}
+.ai-zone-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.confidence-ring{position:relative;width:80px;height:80px;flex-shrink:0;}
+.confidence-ring svg{width:80px;height:80px;transform:rotate(-90deg);}
+.confidence-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
+
+/* ══════════ ANALYTICS ══════════ */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* ══════════ SETTINGS ══════════ */
+.settings-group{background:var(--surface);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px;}
+.settings-group-title{padding:14px 18px;border-bottom:1px solid var(--border);font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--text);background:var(--surface2);}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-row-label{font-size:13px;font-weight:600;color:var(--text);}
+.settings-row-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:99px;cursor:pointer;transition:.3s;}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.toggle input:checked+.toggle-slider{background:var(--blue);}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px);}
+.f-select{padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;outline:none;cursor:pointer;}
+.f-select:focus{border-color:var(--blue);}
+
+/* ══════════ RESPONSIVE ══════════ */
+@media(max-width:1100px){
+  .g6{grid-template-columns:repeat(3,1fr);}
+  .g4{grid-template-columns:repeat(2,1fr);}
+  .analytics-grid{grid-template-columns:1fr;}
+}
+@media(max-width:860px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+  .sidebar.open{transform:translateX(0);}
+  .sb-close{display:block;}
+  .hamburger{display:flex;}
+  .main-wrapper{margin-left:0;}
+  .g3{grid-template-columns:1fr 1fr;}
+  .g6{grid-template-columns:repeat(2,1fr);}
+  .cctv-grid{grid-template-columns:1fr 1fr;}
+  #clock{display:none;}
+}
+@media(max-width:560px){
+  .g2,.g3,.g4,.g6{grid-template-columns:1fr;}
+  .cctv-grid{grid-template-columns:1fr;}
+  .login-left{display:none;}
+  .login-right{width:100%;}
+  .analytics-grid{grid-template-columns:1fr;}
+  .h-btn span{display:none;}
+  .page{padding:12px;}
+}
+
+/* ══════════ INCIDENT HISTORY ══════════ */
+.incident-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);}
+.incident-item:last-child{border-bottom:none;}
+.inc-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.inc-time{font-size:11px;color:var(--text3);margin-top:3px;}
+
+/* ══════════ CONTROL ROOM VIEW ══════════ */
+#ctrl-room-view{display:none;position:fixed;inset:0;z-index:1000;background:#0a1628;flex-direction:column;}
+#ctrl-room-view.open{display:flex;}
+.cr-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+.cr-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;}
+.cr-body{flex:1;display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:12px;padding:12px;overflow:hidden;}
+.cr-panel{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+.cr-panel-title{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.5px;text-transform:uppercase;}
+.cr-map{flex:1;position:relative;background:linear-gradient(180deg,#0d1f3c,#0a1628);background-image:linear-gradient(rgba(0,229,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px);background-size:30px 30px;}
+.cr-stat{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
+.cr-stat-val{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:#00e5ff;}
+.cr-stat-lbl{font-size:11px;color:rgba(255,255,255,.5);}
+
+/* Progress for ambulance ETA */
+.eta-bar{height:4px;background:rgba(255,255,255,.1);border-radius:99px;margin-top:4px;}
+.eta-fill{height:100%;border-radius:99px;background:var(--green);transition:width .5s ease;}
+</style>
+</head>
+<body>
+
+<!-- ══════ TOAST CONTAINER ══════ -->
+<div id="toast-container"></div>
+
+<!-- ══════ ALERT POPUP ══════ -->
+<div id="alert-popup">
+  <div class="alert-popup-header">
+    <div class="alert-popup-icon">🚨</div>
+    <div>
+      <div class="alert-popup-title" id="alert-popup-title">Accident Detected!</div>
+      <div class="alert-popup-sub" id="alert-popup-sub">NH-48 @ Km 22 · Severity: HIGH</div>
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--text2);margin-bottom:14px;" id="alert-popup-detail">AI confidence: 94.2% · 2 vehicles involved · Emergency response required</div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-danger btn-sm" style="flex:1" onclick="dispatchAmbulance()">🚑 Dispatch Ambulance</button>
+    <button class="btn btn-primary btn-sm" style="flex:1" onclick="acceptAlert()">✓ Accept & Log</button>
+    <button class="btn btn-outline btn-sm" onclick="closeAlertPopup()">✕</button>
+  </div>
+</div>
+
+<!-- ══════ NOTIFICATION MODAL ══════ -->
+<div class="modal-bg" id="notif-modal">
+  <div class="modal" style="max-width:420px;">
+    <button class="modal-close" onclick="closeModal('notif-modal')">✕</button>
+    <div class="modal-title">🔔 Notifications</div>
+    <div id="notif-list" style="max-height:380px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- ══════ DISPATCH MODAL ══════ -->
+<div class="modal-bg" id="dispatch-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('dispatch-modal')">✕</button>
+    <div class="modal-title">🚑 Dispatch Emergency Vehicle</div>
+    <div class="modal-sub">Select vehicle and confirm dispatch to incident location</div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:7px;">Select Vehicle</label>
+      <select class="f-select" style="width:100%;" id="dispatch-vehicle">
+        <option value="AMB-001">AMB-001 — Dr. Priya S. (Available)</option>
+        <option value="AMB-003">AMB-003 — Dr. Meena V. (Available)</option>
+        <option value="PT-104">PT-104 — Patrol Unit D (Nearby)</option>
+      </select>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:7px;">Priority</label>
+      <select class="f-select" style="width:100%;" id="dispatch-priority">
+        <option>HIGH — Life threatening</option>
+        <option>MEDIUM — Injury reported</option>
+        <option>LOW — Property damage only</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <button class="btn btn-danger" style="flex:1" onclick="confirmDispatch()">🚑 Confirm Dispatch</button>
+      <button class="btn btn-outline" onclick="closeModal('dispatch-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ EXPORT MODAL ══════ -->
+<div class="modal-bg" id="export-modal">
+  <div class="modal" style="max-width:420px;">
+    <button class="modal-close" onclick="closeModal('export-modal')">✕</button>
+    <div class="modal-title">📊 Export Data</div>
+    <div class="modal-sub">Choose what to export and the format</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border:1.5px solid var(--border);border-radius:10px;transition:all .2s;" id="exp-opt-1" onclick="selectExport(1)">
+        <input type="radio" name="exp" value="incidents" checked style="accent-color:var(--blue);">
+        <div><div style="font-size:13px;font-weight:600;color:var(--text);">Incident Report</div><div style="font-size:11px;color:var(--text2);">All incidents with response times</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border:1.5px solid var(--border);border-radius:10px;" id="exp-opt-2" onclick="selectExport(2)">
+        <input type="radio" name="exp" value="traffic" style="accent-color:var(--blue);">
+        <div><div style="font-size:13px;font-weight:600;color:var(--text);">Traffic Analytics</div><div style="font-size:11px;color:var(--text2);">Vehicle counts and congestion data</div></div>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border:1.5px solid var(--border);border-radius:10px;" id="exp-opt-3" onclick="selectExport(3)">
+        <input type="radio" name="exp" value="fleet" style="accent-color:var(--blue);">
+        <div><div style="font-size:13px;font-weight:600;color:var(--text);">Fleet Status Report</div><div style="font-size:11px;color:var(--text2);">Ambulances and patrol vehicles</div></div>
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="doExport('pdf')">📄 Export PDF</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="doExport('csv')">📋 Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ CCTV FULLSCREEN MODAL ══════ -->
+<div class="modal-bg" id="cctv-modal">
+  <div class="modal" style="max-width:700px;">
+    <button class="modal-close" onclick="closeModal('cctv-modal')">✕</button>
+    <div class="modal-title" id="cctv-modal-title">CAM-01 — NH-48 Junction</div>
+    <div style="background:#0a1628;border-radius:12px;height:380px;position:relative;overflow:hidden;margin-bottom:14px;" id="cctv-modal-feed">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(0,255,255,.5);font-family:monospace;font-size:12px;flex-direction:column;gap:6px;">
+        <div style="font-size:32px;">📹</div>
+        <div>LIVE FEED ACTIVE</div>
+        <div style="font-size:10px;color:rgba(0,255,255,.3);">AI Detection: ENABLED</div>
+      </div>
+      <div style="position:absolute;top:10px;left:10px;font-size:10px;color:#0ff;font-family:monospace;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:4px;" id="cctv-modal-id">CAM-01</div>
+      <div style="position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:4px;">
+        <div style="width:7px;height:7px;background:var(--red);border-radius:50%;animation:blink 1s infinite;"></div>
+        <span style="font-size:10px;color:#fff;font-family:monospace;">REC</span>
+      </div>
+      <div style="position:absolute;bottom:10px;left:10px;font-size:10px;color:rgba(255,255,255,.7);font-family:monospace;" id="cctv-modal-stats">Vehicles detected: 12 | Speed avg: 48 km/h</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary btn-sm" onclick="toast('📸 Screenshot saved to reports')">📸 Screenshot</button>
+      <button class="btn btn-amber btn-sm" onclick="toast('⚠️ Manual incident flagged','warn')">⚠️ Flag Incident</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('cctv-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ LOGIN ══════ -->
+<div id="login-screen">
+  <div class="login-left">
+    <div style="position:relative;z-index:1;text-align:center;max-width:400px;width:100%;">
+      <div class="l-logo">
+        <div class="l-logo-icon">🚦</div>
+        <div>
+          <div class="l-brand">Traffic<span>AI</span></div>
+          <div style="font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.5px;">GOVERNMENT CONTROL SYSTEM</div>
+        </div>
+      </div>
+      <div class="l-tagline">AI-Powered Smart City Traffic<br>Command & Control Centre</div>
+      <div class="l-stats">
+        <div class="l-stat"><div class="l-stat-val">99.4%</div><div class="l-stat-lbl">Detection Accuracy</div></div>
+        <div class="l-stat"><div class="l-stat-val">20ms</div><div class="l-stat-lbl">Response Latency</div></div>
+        <div class="l-stat"><div class="l-stat-val">24/7</div><div class="l-stat-lbl">Live Monitoring</div></div>
+        <div class="l-stat"><div class="l-stat-val">30%</div><div class="l-stat-lbl">Faster Response</div></div>
+      </div>
+      <div class="l-gov-badge">🏛️ Ministry of Smart Cities — Secure Government Portal</div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="l-form">
+      <div class="l-greeting">Welcome Back 👋</div>
+      <div class="l-sub">Sign in to the control centre</div>
+      <div class="role-tabs">
+        <div class="role-tab active" onclick="setRole('admin',this)">🛡️ Admin</div>
+        <div class="role-tab" onclick="setRole('operator',this)">👨‍💻 Operator</div>
+      </div>
+      <div class="f-field">
+        <label>Username / Email</label>
+        <div class="f-wrap"><span class="f-icon">👤</span><input type="text" id="l-user" placeholder="admin@trafficai.gov" autocomplete="off" autocapitalize="none"></div>
+        <div class="f-hint">Use: admin</div>
+      </div>
+      <div class="f-field">
+        <label>Password</label>
+        <div class="f-wrap"><span class="f-icon">🔒</span><input type="password" id="l-pass" placeholder="Enter your password"></div>
+        <div class="f-hint">Use: admin123</div>
+      </div>
+      <button class="l-btn" onclick="doLogin()">Sign In &nbsp;→</button>
+      <div class="l-err" id="l-err">⚠️ Invalid credentials. Please try again.</div>
+      <hr class="l-divider">
+      <div class="l-footer">🔐 Secured with JWT + bcrypt encryption<br>TrafficAI Gov v3.1 · 2025–2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ APP ══════ -->
+<div id="app">
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- Control Room View (full screen) -->
+  <div id="ctrl-room-view">
+    <div class="cr-header">
+      <div class="cr-title">🖥️ Control Room — Full Screen View
+        <span style="font-size:11px;color:rgba(255,255,255,.5);font-weight:400;font-family:'Plus Jakarta Sans'">LIVE</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:12px;color:rgba(255,255,255,.5);font-family:monospace;" id="cr-clock"></div>
+        <button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.2);" onclick="toggleControlRoom()">✕ Exit</button>
+      </div>
+    </div>
+    <div class="cr-body">
+      <!-- Left: CCTV -->
+      <div class="cr-panel">
+        <div class="cr-panel-title">📹 Live CCTV Feeds</div>
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;overflow:auto;">
+          <div style="background:#0d1f3c;border-radius:8px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:9px;color:#0ff;font-family:monospace;flex-direction:column;gap:2px;border:1px solid rgba(0,255,255,.1);">
+            <div>CAM-01</div><div style="color:rgba(255,255,255,.3);">NH-48 Jct</div>
+          </div>
+          <div style="background:#0d1f3c;border-radius:8px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:9px;color:#0ff;font-family:monospace;flex-direction:column;gap:2px;border:1px solid rgba(0,255,255,.1);">
+            <div>CAM-02</div><div style="color:rgba(255,255,255,.3);">Ring Rd S14</div>
+          </div>
+          <div style="background:#0d1f3c;border-radius:8px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:9px;color:#ff4d8d;font-family:monospace;flex-direction:column;gap:2px;border:1px solid rgba(255,77,141,.3);animation:blink 1s infinite;">
+            <div>CAM-03 ⚠</div><div style="color:rgba(255,255,255,.3);">Incident Detected</div>
+          </div>
+          <div style="background:#0d1f3c;border-radius:8px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:9px;color:#0ff;font-family:monospace;flex-direction:column;gap:2px;border:1px solid rgba(0,255,255,.1);">
+            <div>CAM-04</div><div style="color:rgba(255,255,255,.3);">MG Rd</div>
+          </div>
+        </div>
+      </div>
+      <!-- Center: Map -->
+      <div class="cr-panel">
+        <div class="cr-panel-title">🗺️ Live City Map</div>
+        <div class="cr-map" id="cr-map">
+          <div style="position:absolute;top:10px;left:10px;font-size:10px;color:#0ff;font-family:monospace;">LIVE TRAFFIC MAP</div>
+        </div>
+      </div>
+      <!-- Right: Stats + Alerts -->
+      <div class="cr-panel">
+        <div class="cr-panel-title">📊 Live Stats & Alerts</div>
+        <div class="cr-stat"><div><div class="cr-stat-val" id="cr-total">2,341</div><div class="cr-stat-lbl">Total Vehicles</div></div></div>
+        <div class="cr-stat"><div><div class="cr-stat-val" id="cr-amb" style="color:#ff4d8d;">2</div><div class="cr-stat-lbl">Ambulances Active</div></div></div>
+        <div class="cr-stat"><div><div class="cr-stat-val" id="cr-inc" style="color:#ffa040;">4</div><div class="cr-stat-lbl">Today's Incidents</div></div></div>
+        <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;">Live Alerts</div>
+        <div style="flex:1;overflow-y:auto;padding:8px;" id="cr-alerts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-mark">
+        <div class="sb-icon">🚦</div>
+        <div class="sb-title">Traffic<span>AI</span></div>
+      </div>
+      <button class="sb-close" onclick="closeSidebar()">✕</button>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-section">Monitor</div>
+      <div class="nav-item active" data-page="overview" onclick="navigate(this)"><span class="ni">📊</span> Overview</div>
+      <div class="nav-item" data-page="live-traffic" onclick="navigate(this)"><span class="ni">🚗</span> Live Traffic</div>
+      <div class="nav-item" data-page="map" onclick="navigate(this)"><span class="ni">🗺️</span> Map View</div>
+      <div class="sb-section">Emergency</div>
+      <div class="nav-item" data-page="alerts" onclick="navigate(this)"><span class="ni">🚨</span> Emergency Alerts <span class="badge" id="alert-badge">3</span></div>
+      <div class="nav-item" data-page="ambulance" onclick="navigate(this)"><span class="ni">🚑</span> Ambulance Tracking</div>
+      <div class="nav-item" data-page="patrol" onclick="navigate(this)"><span class="ni">🚔</span> Patrol Vehicles</div>
+      <div class="sb-section">Surveillance</div>
+      <div class="nav-item" data-page="cctv" onclick="navigate(this)"><span class="ni">📹</span> CCTV Monitoring</div>
+      <div class="nav-item" data-page="ai" onclick="navigate(this)"><span class="ni">🤖</span> AI Prediction</div>
+      <div class="sb-section">Admin</div>
+      <div class="nav-item" data-page="analytics" onclick="navigate(this)"><span class="ni">📈</span> Analytics</div>
+      <div class="nav-item" data-page="settings" onclick="navigate(this)"><span class="ni">⚙️</span> Settings</div>
+    </div>
+    <div class="sb-bottom">
+      <div class="user-card">
+        <div class="u-ava" id="u-ava">A</div>
+        <div>
+          <div class="u-name" id="u-name">Admin</div>
+          <div class="u-role" id="u-role">Super Admin · Online</div>
+        </div>
+      </div>
+      <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:4px;" onclick="doLogout()">↩ Sign Out</button>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header>
+      <div class="h-left">
+        <button class="hamburger" onclick="openSidebar()">☰</button>
+        <div class="h-title" id="h-title">Overview Dashboard</div>
+      </div>
+      <div class="h-right">
+        <div class="status-pill"><div class="s-dot"></div><span>All Systems Active</span></div>
+        <button class="h-btn" id="notif-btn" onclick="openModal('notif-modal');loadNotifications()">🔔 <span>Alerts</span><div class="notif-dot" id="notif-dot"></div></button>
+        <button class="h-btn" onclick="openModal('export-modal')">📊 <span>Export</span></button>
+        <button class="h-btn" onclick="toggleDarkMode()">🌙 <span id="theme-lbl">Dark</span></button>
+        <button class="h-btn" onclick="toggleControlRoom()">🖥️ <span>Ctrl Room</span></button>
+        <div id="clock">—</div>
+      </div>
+    </header>
+
+    <!-- ══════ OVERVIEW PAGE ══════ -->
+    <div class="page active" id="page-overview">
+      <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div class="section-title">📊 Overview Dashboard</div>
+          <div style="font-size:13px;color:var(--text2);">Real-time traffic intelligence · Auto-updating every 3s</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="openModal('dispatch-modal')">🚑 Dispatch</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('export-modal')">📊 Export Report</button>
+        </div>
+      </div>
+      <div class="g6" style="margin-bottom:16px;">
+        <div class="kpi blue"><span class="kpi-badge tag-blue up">↑ 4%</span><div class="kpi-ico">🚗</div><div class="kpi-val" id="k-total">—</div><div class="kpi-lbl">Total Vehicles</div></div>
+        <div class="kpi green"><span class="kpi-badge tag-green">LOW</span><div class="kpi-ico">🚦</div><div class="kpi-val" id="k-cong">—</div><div class="kpi-lbl">Congestion Level</div></div>
+        <div class="kpi amber"><span class="kpi-badge tag-amber">2 active</span><div class="kpi-ico">🚑</div><div class="kpi-val" id="k-amb">6</div><div class="kpi-lbl">Ambulances</div></div>
+        <div class="kpi sky"><span class="kpi-badge tag-blue">On duty</span><div class="kpi-ico">🚔</div><div class="kpi-val">12</div><div class="kpi-lbl">Patrol Vehicles</div></div>
+        <div class="kpi red"><span class="kpi-badge tag-red" id="k-inc-badge">Today</span><div class="kpi-ico">⚠️</div><div class="kpi-val" id="k-inc">7</div><div class="kpi-lbl">Incidents Today</div></div>
+        <div class="kpi purple"><span class="kpi-badge" style="background:var(--purple-lt);color:var(--purple)">Avg</span><div class="kpi-ico">⏱️</div><div class="kpi-val" id="k-resp">—</div><div class="kpi-lbl">Response Time</div></div>
+      </div>
+      <div class="g2" style="margin-bottom:16px;">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">📈 Live Vehicle Count</div><div class="live-badge"><div class="s-dot"></div>REAL-TIME</div></div>
+          <div class="chart-box" style="height:220px;"><canvas id="chart-live"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">🍩 Congestion Distribution</div><div class="live-badge"><div class="s-dot"></div>LIVE</div></div>
+          <div class="chart-box" style="height:220px;"><canvas id="chart-pie"></canvas></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">📊 Hourly Traffic Volume</div></div>
+          <div class="chart-box" style="height:200px;"><canvas id="chart-bar"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">⏱️ Response Time Comparison</div></div>
+          <div class="chart-box" style="height:200px;"><canvas id="chart-resp"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ LIVE TRAFFIC PAGE ══════ -->
+    <div class="page" id="page-live-traffic">
+      <div class="section-title">🚗 Live Traffic Monitor</div>
+      <div class="g2" style="margin-bottom:14px;">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Real-time Vehicle Count</div><div class="live-badge"><div class="s-dot"></div>LIVE</div></div>
+          <div class="chart-box" style="height:280px;"><canvas id="chart-live2"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Zone-wise Congestion</div></div>
+          <div style="padding:16px;">
+            <div id="zone-bars"></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">📋 Live Traffic Feed</div><div class="live-badge"><div class="s-dot"></div>AUTO-UPDATE</div></div>
+        <div class="tbl-wrap" style="max-height:280px;">
+          <table class="tbl">
+            <thead><tr><th>Zone</th><th>Location</th><th>Vehicles</th><th>Speed Avg</th><th>Congestion</th><th>Signal</th><th>Last Update</th></tr></thead>
+            <tbody id="traffic-feed-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ MAP PAGE ══════ -->
+    <div class="page" id="page-map">
+      <div class="section-title" style="margin-bottom:12px;">🗺️ City Traffic Map</div>
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head">
+          <div class="panel-title">Live Vehicle Map</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn btn-outline btn-sm" onclick="toggleHeatmap()">🔥 <span id="heatmap-lbl">Show Heatmap</span></button>
+            <button class="btn btn-outline btn-sm" onclick="centerMap()">📍 Center Map</button>
+            <div class="live-badge"><div class="s-dot"></div>LIVE</div>
+          </div>
+        </div>
+        <div id="map-container">
+          <div class="map-mock" id="map-mock">
+            <div class="map-grid"></div>
+            <!-- Roads -->
+            <div class="map-road h" style="top:18%;background:rgba(255,255,255,.6);"></div>
+            <div class="map-road h" style="top:40%;background:rgba(255,255,255,.5);"></div>
+            <div class="map-road h" style="top:62%;background:rgba(255,255,255,.6);"></div>
+            <div class="map-road h" style="top:82%;background:rgba(255,255,255,.4);"></div>
+            <div class="map-road v" style="left:20%;background:rgba(255,255,255,.6);"></div>
+            <div class="map-road v" style="left:42%;background:rgba(255,255,255,.5);"></div>
+            <div class="map-road v" style="left:64%;background:rgba(255,255,255,.6);"></div>
+            <div class="map-road v" style="left:84%;background:rgba(255,255,255,.4);"></div>
+            <!-- Intersections -->
+            <div style="position:absolute;left:20%;top:18%;width:14px;height:14px;border-radius:50%;border:2.5px solid var(--blue);background:var(--surface);transform:translate(-50%,-50%);"></div>
+            <div style="position:absolute;left:42%;top:18%;width:14px;height:14px;border-radius:50%;border:2.5px solid var(--red);background:var(--surface);transform:translate(-50%,-50%);animation:pulse-r 1.5s infinite;"></div>
+            <div style="position:absolute;left:64%;top:18%;width:14px;height:14px;border-radius:50%;border:2.5px solid var(--blue);background:var(--surface);transform:translate(-50%,-50%);"></div>
+            <div style="position:absolute;left:20%;top:40%;width:14px;height:14px;border-radius:50%;border:2.5px solid var(--blue);background:var(--surface);transform:translate(-50%,-50%);"></div>
+            <div style="position:absolute;left:42%;top:40%;width:14px;height:14px;border-radius:50%;border:2.5px solid var(--amber);background:var(--surface);transform:translate(-50%,-50%);"></div>
+            <div style="position:absolute;left:64%;top:40%;width:14px;height:14px;border-radius:50%;border:2.5px solid var(--blue);background:var(--surface);transform:translate(-50%,-50%);"></div>
+            <div style="position:absolute;left:64%;top:62%;width:14px;height:14px;border-radius:50%;border:2.5px solid var(--red);background:var(--surface);transform:translate(-50%,-50%);animation:pulse-r 1.5s infinite;"></div>
+            <style>@keyframes pulse-r{0%,100%{box-shadow:0 0 0 3px rgba(247,37,133,.2)}50%{box-shadow:0 0 0 8px rgba(247,37,133,.04)}}</style>
+          </div>
+          <div class="map-controls">
+            <div class="map-ctrl-btn" title="Zoom In" onclick="toast('🔍 Map zoomed in')">＋</div>
+            <div class="map-ctrl-btn" title="Zoom Out" onclick="toast('🔍 Map zoomed out')">－</div>
+            <div class="map-ctrl-btn" title="Satellite" onclick="toast('🛰️ Satellite view toggled')">🛰️</div>
+            <div class="map-ctrl-btn" title="Route" onclick="toast('🗺️ Route planning activated')">🗺️</div>
+          </div>
+          <div class="map-legend">
+            <div class="map-leg-item"><div class="leg-dot" style="background:var(--blue);"></div>Vehicle</div>
+            <div class="map-leg-item"><div class="leg-dot" style="background:var(--red);"></div>Ambulance</div>
+            <div class="map-leg-item"><div class="leg-dot" style="background:var(--blue);border:2px solid var(--sky);"></div>Patrol</div>
+            <div class="map-leg-item"><div class="leg-dot" style="background:var(--red);border:2px solid #fff;"></div>Incident</div>
+          </div>
+          <div class="map-tooltip" id="map-tooltip"></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">📍 Active Incidents on Map</div></div>
+          <div class="tbl-wrap" style="max-height:200px;">
+            <table class="tbl">
+              <thead><tr><th>Type</th><th>Location</th><th>Severity</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="map-inc-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">🚑 Route Optimization</div></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:10px;" id="route-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ ALERTS PAGE ══════ -->
+    <div class="page" id="page-alerts">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="section-title" style="margin-bottom:0;">🚨 Emergency Alerts</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="markAllRead()">✓ Mark All Read</button>
+          <button class="btn btn-danger btn-sm" onclick="triggerAlert()">⚠️ Simulate Alert</button>
+        </div>
+      </div>
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head"><div class="panel-title">🔴 Active Incidents</div><div class="live-badge"><div class="s-dot"></div>LIVE</div></div>
+        <div id="active-alerts" style="padding:16px;display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">📋 Incident History Log</div><div style="display:flex;gap:8px;"><button class="btn btn-outline btn-sm" onclick="openModal('export-modal')">📥 Export</button></div></div>
+        <div style="padding:16px;" id="inc-history"></div>
+      </div>
+    </div>
+
+    <!-- ══════ AMBULANCE PAGE ══════ -->
+    <div class="page" id="page-ambulance">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="section-title" style="margin-bottom:0;">🚑 Ambulance Fleet Tracking</div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('dispatch-modal')">+ Dispatch</button>
+      </div>
+      <div class="g4" style="margin-bottom:14px;" id="amb-kpi-grid">
+        <div class="kpi green"><div class="kpi-ico">✅</div><div class="kpi-val" id="amb-avail">4</div><div class="kpi-lbl">Available</div></div>
+        <div class="kpi red"><div class="kpi-ico">🚨</div><div class="kpi-val" id="amb-active">2</div><div class="kpi-lbl">On Duty</div></div>
+        <div class="kpi amber"><div class="kpi-ico">⚡</div><div class="kpi-val" id="amb-speed">62</div><div class="kpi-lbl">Avg Speed km/h</div></div>
+        <div class="kpi blue"><div class="kpi-ico">⏱️</div><div class="kpi-val" id="amb-eta">6 min</div><div class="kpi-lbl">Avg ETA</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Live Ambulance Status</div><div class="live-badge"><div class="s-dot"></div>GPS TRACKING</div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Unit ID</th><th>Driver</th><th>Location</th><th>Speed</th><th>Destination</th><th>ETA</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="amb-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ PATROL PAGE ══════ -->
+    <div class="page" id="page-patrol">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="section-title" style="margin-bottom:0;">🚔 Patrol Vehicle Monitoring</div>
+        <button class="btn btn-primary btn-sm" onclick="toast('📡 All patrol units pinged')">📡 Ping All Units</button>
+      </div>
+      <div class="g4" style="margin-bottom:14px;">
+        <div class="kpi blue"><div class="kpi-ico">🚔</div><div class="kpi-val">8</div><div class="kpi-lbl">On Patrol</div></div>
+        <div class="kpi green"><div class="kpi-ico">✅</div><div class="kpi-val">3</div><div class="kpi-lbl">Standby</div></div>
+        <div class="kpi amber"><div class="kpi-ico">🚨</div><div class="kpi-val">1</div><div class="kpi-lbl">Responding</div></div>
+        <div class="kpi sky"><div class="kpi-ico">📡</div><div class="kpi-val">12</div><div class="kpi-lbl">Total Deployed</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Live Patrol Status</div><div class="live-badge"><div class="s-dot"></div>LIVE</div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Unit</th><th>Officer</th><th>Zone</th><th>Location</th><th>Speed</th><th>Status</th><th>Assignment</th><th>Action</th></tr></thead>
+            <tbody id="patrol-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ CCTV PAGE ══════ -->
+    <div class="page" id="page-cctv">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+        <div class="section-title" style="margin-bottom:0;">📹 CCTV Monitoring</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="toast('📸 All feeds captured','ok')">📸 Snapshot All</button>
+          <button class="btn btn-primary btn-sm" onclick="toast('🔴 Recording started for all feeds')">🔴 Record All</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Live Camera Grid — 9 Cameras</div><div class="live-badge"><div class="s-dot"></div>AI DETECTION ON</div></div>
+        <div class="cctv-grid" id="cctv-grid"></div>
+      </div>
+    </div>
+
+    <!-- ══════ AI PREDICTION PAGE ══════ -->
+    <div class="page" id="page-ai">
+      <div class="section-title">🤖 AI Prediction Engine</div>
+      <div class="g2" style="margin-bottom:14px;">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">🔮 Congestion Forecast (Next 30 min)</div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:var(--text3);">YOLO v8</span><div class="live-badge"><div class="s-dot"></div>ML ACTIVE</div></div></div>
+          <div style="padding:16px;">
+            <div id="ai-bars"></div>
+            <div style="margin-top:16px;padding:12px;background:var(--blue-lt);border-radius:10px;font-size:12px;color:var(--blue);font-weight:500;">
+              💡 AI Recommendation: Divert traffic from NH-48 to Ring Road. Expected improvement: <strong>23%</strong>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">🎯 ML Confidence Score</div></div>
+          <div style="padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;">
+            <div class="confidence-ring">
+              <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" stroke-width="8"/><circle cx="40" cy="40" r="32" fill="none" stroke="var(--blue)" stroke-width="8" stroke-dasharray="201" stroke-dashoffset="20" stroke-linecap="round"/></svg>
+              <div class="confidence-val">94%</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:var(--text);">High Confidence</div>
+              <div style="font-size:12px;color:var(--text2);">Model accuracy on live data</div>
+            </div>
+            <div style="width:100%;display:flex;flex-direction:column;gap:8px;" id="ai-model-stats"></div>
+          </div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">⚠️ Accident-Prone Zones</div></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:8px;" id="ai-zones"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">🌦️ Weather Impact Analysis</div></div>
+          <div style="padding:16px;" id="ai-weather"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ ANALYTICS PAGE ══════ -->
+    <div class="page" id="page-analytics">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div class="section-title" style="margin-bottom:0;">📈 Analytics Dashboard</div>
+        <div style="display:flex;gap:8px;">
+          <select class="f-select" id="analytics-range" onchange="updateAnalytics()">
+            <option>Last 24 Hours</option>
+            <option>Last 7 Days</option>
+            <option>Last 30 Days</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="openModal('export-modal')">📊 Export</button>
+        </div>
+      </div>
+      <div class="g4" style="margin-bottom:14px;">
+        <div class="kpi blue"><div class="kpi-ico">📊</div><div class="kpi-val" id="a-total">24,812</div><div class="kpi-lbl">Total Vehicles Logged</div></div>
+        <div class="kpi red"><div class="kpi-ico">⚠️</div><div class="kpi-val" id="a-inc">7</div><div class="kpi-lbl">Incidents Recorded</div></div>
+        <div class="kpi green"><div class="kpi-ico">✅</div><div class="kpi-val" id="a-resp">8.4 min</div><div class="kpi-lbl">Avg Response Time</div></div>
+        <div class="kpi amber"><div class="kpi-ico">🚑</div><div class="kpi-val" id="a-disp">12</div><div class="kpi-lbl">Dispatches</div></div>
+      </div>
+      <div class="analytics-grid" style="margin-bottom:14px;">
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Daily Incident Trend</div></div>
+          <div class="chart-box" style="height:240px;"><canvas id="chart-analytics1"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title">Vehicle Type Distribution</div></div>
+          <div class="chart-box" style="height:240px;"><canvas id="chart-analytics2"></canvas></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Top Incident Zones</div><button class="btn btn-outline btn-sm" onclick="openModal('export-modal')">📥 Download</button></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Zone</th><th>Incidents</th><th>Avg Severity</th><th>Avg Response</th><th>Most Common</th><th>Risk Level</th></tr></thead>
+            <tbody id="analytics-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ SETTINGS PAGE ══════ -->
+    <div class="page" id="page-settings">
+      <div class="section-title">⚙️ System Settings</div>
+      <div class="settings-group">
+        <div class="settings-group-title">🎨 Appearance</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Dark Mode</div><div class="settings-row-sub">Switch to dark theme</div></div>
+          <label class="toggle"><input type="checkbox" id="dark-toggle" onchange="toggleDarkMode()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Compact View</div><div class="settings-row-sub">Reduce card padding</div></div>
+          <label class="toggle"><input type="checkbox" id="compact-toggle" onchange="toast('🔲 Compact mode toggled')"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Language</div><div class="settings-row-sub">Interface language</div></div>
+          <select class="f-select" onchange="toast('🌐 Language updated')"><option>English</option><option>Hindi</option><option>Marathi</option></select>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">🔔 Notifications & Alerts</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Sound Alerts</div><div class="settings-row-sub">Play sound on incident detection</div></div>
+          <label class="toggle"><input type="checkbox" checked id="sound-toggle"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Auto-dispatch Ambulance</div><div class="settings-row-sub">Auto-dispatch on HIGH severity</div></div>
+          <label class="toggle"><input type="checkbox" checked id="autodispatch-toggle"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Alert Refresh Rate</div><div class="settings-row-sub">Data polling interval</div></div>
+          <select class="f-select" onchange="toast('⏱️ Refresh rate updated')"><option>3 seconds</option><option>5 seconds</option><option>10 seconds</option></select>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">🤖 AI & Detection</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">YOLO Detection Model</div><div class="settings-row-sub">Active ML model version</div></div>
+          <select class="f-select" onchange="toast('🤖 Model updated — reloading...')"><option>YOLOv8 (Recommended)</option><option>YOLOv5</option><option>YOLOv7</option></select>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">Detection Confidence Threshold</div><div class="settings-row-sub">Minimum AI confidence to flag incident</div></div>
+          <select class="f-select" onchange="toast('🎯 Threshold updated')"><option>80%</option><option>85%</option><option>90%</option><option>95%</option></select>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">AI Predictions</div><div class="settings-row-sub">Enable ML congestion forecasting</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">🗺️ Map & Location</div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">City</div><div class="settings-row-sub">Primary monitoring area</div></div>
+          <select class="f-select" onchange="toast('🗺️ City changed — reloading map...')"><option>Mumbai</option><option>Delhi</option><option>Bangalore</option><option>Chennai</option><option>Hyderabad</option></select>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-label">GPS Update Interval</div><div class="settings-row-sub">How often vehicle positions refresh</div></div>
+          <select class="f-select" onchange="toast('📡 GPS interval updated')"><option>3 seconds</option><option>5 seconds</option><option>10 seconds</option></select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+        <button class="btn btn-outline" onclick="toast('🔄 Settings reset to defaults','warn')">↺ Reset Defaults</button>
+        <button class="btn btn-danger" onclick="confirmClear()">🗑️ Clear All Data</button>
+      </div>
+    </div>
+
+  </div><!-- /main-wrapper -->
+</div><!-- /app -->
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let currentRole = 'admin';
+let isDark = false;
+let heatmapOn = false;
+let blips = [];
+let chartLive, chartPie, chartBar, chartResp, chartLive2, chartA1, chartA2;
+let timerInt, dataInt, alertInt, mapInt, cctvInt;
+let notifications = [];
+let alertCount = 3;
+let incidentCount = 7;
+
+const AMB_DATA = [
+  {id:'AMB-001',driver:'Dr. Priya S.',loc:'NH-48 Km 22',dest:'Ring Rd Accident',st:'enroute',spd:0,eta:'8 min'},
+  {id:'AMB-002',driver:'Dr. Rajan K.',loc:'City Hospital',dest:'Standby',st:'standby',spd:0,eta:'—'},
+  {id:'AMB-003',driver:'Dr. Meena V.',loc:'Sector 9',dest:'Standby',st:'standby',spd:0,eta:'—'},
+  {id:'AMB-004',driver:'Dr. Arun M.',loc:'East Rd Jct',dest:'MG Road Incident',st:'enroute',spd:0,eta:'5 min'},
+  {id:'AMB-005',driver:'Dr. Seema R.',loc:'West Depot',dest:'Standby',st:'standby',spd:0,eta:'—'},
+  {id:'AMB-006',driver:'Dr. Karan T.',loc:'Central Hub',dest:'Standby',st:'standby',spd:0,eta:'—'},
+];
+
+const PATROL_DATA = [
+  {id:'PT-101',officer:'Insp. Kumar',zone:'Sector A',loc:'NH-48',st:'patrol',assign:'—'},
+  {id:'PT-102',officer:'SI. Sharma',zone:'Sector B',loc:'Market Area',st:'patrol',assign:'—'},
+  {id:'PT-103',officer:'Const. Patil',zone:'Sector C',loc:'Ring Road',st:'responding',assign:'Ring Rd Accident'},
+  {id:'PT-104',officer:'Insp. Mehta',zone:'Sector D',loc:'Airport Rd',st:'patrol',assign:'—'},
+  {id:'PT-105',officer:'SI. Singh',zone:'Sector E',loc:'Highway',st:'standby',assign:'—'},
+  {id:'PT-106',officer:'Const. Reddy',zone:'Sector F',loc:'South Zone',st:'patrol',assign:'—'},
+  {id:'PT-107',officer:'Insp. Nair',zone:'Sector G',loc:'East Blvd',st:'patrol',assign:'—'},
+  {id:'PT-108',officer:'SI. Patel',zone:'Sector H',loc:'North Hub',st:'standby',assign:'—'},
+];
+
+const ZONES = ['NH-48 Junction','Ring Road S14','MG Road Crossing','Central Ave','Airport Expressway','Outer Ring Rd','Sector 9 Market','South Bypass'];
+const CAMS = [
+  {id:'CAM-01',loc:'NH-48 Junction'},{id:'CAM-02',loc:'Ring Rd S14'},{id:'CAM-03',loc:'MG Road Jct'},
+  {id:'CAM-04',loc:'Central Market'},{id:'CAM-05',loc:'Airport Entry'},{id:'CAM-06',loc:'Outer Ring'},
+  {id:'CAM-07',loc:'Sector 9 Cross'},{id:'CAM-08',loc:'South Bypass'},{id:'CAM-09',loc:'North Hub'},
+];
+
+const INCIDENTS = [
+  {type:'Accident',loc:'NH-48 @ Km 22',sev:'HIGH',st:'Active',time:'08:14'},
+  {type:'Congestion',loc:'Ring Road S14',sev:'MED',st:'Monitoring',time:'09:02'},
+  {type:'Breakdown',loc:'MG Road Jct',sev:'LOW',st:'Resolved',time:'07:45'},
+  {type:'Accident',loc:'Central Ave',sev:'HIGH',st:'Dispatched',time:'09:30'},
+  {type:'Signal Fault',loc:'Sector 9',sev:'MED',st:'Monitoring',time:'10:00'},
+  {type:'Flooding',loc:'South Bypass',sev:'HIGH',st:'Active',time:'10:22'},
+  {type:'Wrong Way',loc:'NH-48 Flyover',sev:'HIGH',st:'Active',time:'10:45'},
+];
+
+const r = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+
+// ══════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════
+function setRole(role, el) {
+  currentRole = role;
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function doLogin() {
+  const u = document.getElementById('l-user').value.trim();
+  const p = document.getElementById('l-pass').value.trim();
+  const err = document.getElementById('l-err');
+  if ((u==='admin'||u==='admin@trafficai.gov') && p==='admin123') {
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('u-name').textContent = currentRole === 'admin' ? 'Admin User' : 'Operator';
+    document.getElementById('u-role').textContent = currentRole === 'admin' ? 'Super Admin · Online' : 'Control Room Operator';
+    document.getElementById('u-ava').textContent = currentRole === 'admin' ? 'A' : 'O';
+    initApp();
+  } else {
+    err.style.display='block';
+    setTimeout(()=>err.style.display='none',3000);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter') {
+    if (document.getElementById('login-screen').style.display!=='none') doLogin();
+  }
+});
+
+function doLogout() {
+  [timerInt,dataInt,alertInt,mapInt,cctvInt].forEach(clearInterval);
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  // destroy charts
+  [chartLive,chartPie,chartBar,chartResp,chartLive2,chartA1,chartA2].forEach(c => c && c.destroy());
+  blips=[];
+}
+
+// ══════════════════════════════════════════
+//  NAV & SIDEBAR
+// ══════════════════════════════════════════
+const PAGE_TITLES = {
+  overview:'Overview Dashboard', 'live-traffic':'Live Traffic Monitor',
+  map:'City Map View', alerts:'Emergency Alerts', ambulance:'Ambulance Fleet',
+  patrol:'Patrol Vehicles', cctv:'CCTV Monitoring', ai:'AI Prediction Engine',
+  analytics:'Analytics Dashboard', settings:'System Settings'
+};
+
+function navigate(el) {
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  const page = el.dataset.page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('h-title').textContent = PAGE_TITLES[page] || page;
+  closeSidebar();
+  // Lazy init charts
+  if (page==='live-traffic' && !chartLive2) initLiveTrafficCharts();
+  if (page==='analytics' && !chartA1) initAnalyticsCharts();
+  if (page==='cctv') initCCTV();
+  if (page==='ai') initAI();
+  if (page==='map') initMapPage();
+  if (page==='alerts') renderAlerts();
+  if (page==='analytics') renderAnalytics();
+}
+
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); document.body.style.overflow=''; }
+
+// ══════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+function toast(msg, type='ok') {
+  const t = document.createElement('div');
+  t.className = 'toast' + (type==='warn'?' warn':(type==='err'?' err':''));
+  t.innerHTML = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='.3s'; setTimeout(()=>t.remove(),300); }, 3000);
+}
+
+// ══════════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════════
+function startClock() {
+  const tick = () => {
+    const now = new Date();
+    const s = now.toLocaleTimeString('en-IN',{hour12:false});
+    document.getElementById('clock').textContent = s;
+    const ce = document.getElementById('cr-clock');
+    if (ce) ce.textContent = now.toLocaleString('en-IN',{hour12:false});
+  };
+  tick(); timerInt = setInterval(tick, 1000);
+}
+
+// ══════════════════════════════════════════
+//  KPI UPDATE
+// ══════════════════════════════════════════
+function setVal(id, v) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = v;
+  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+}
+
+function updateKPIs() {
+  const total = r(1800,2500);
+  const congPct = r(18,62);
+  const speed = r(28,72);
+  const resp = r(5,14);
+  setVal('k-total', total.toLocaleString());
+  setVal('k-cong', congPct + '%');
+  setVal('k-resp', resp + ' min');
+  setVal('cr-total', total.toLocaleString());
+  // Update cong badge
+  const badge = document.getElementById('k-inc-badge');
+  if (badge) badge.textContent = 'Today';
+  // Ambulance KPIs
+  setVal('amb-speed', r(50,90));
+  setVal('amb-eta', r(3,12) + ' min');
+}
+
+// ══════════════════════════════════════════
+//  CHART: OVERVIEW
+// ══════════════════════════════════════════
+const chartLabels = [];
+const chartData = [];
+
+function initOverviewCharts() {
+  const now = new Date();
+  for (let i=14;i>=0;i--) {
+    chartLabels.push(new Date(now-i*4000).toLocaleTimeString('en-IN',{hour12:false}));
+    chartData.push(r(600,1600));
+  }
+
+  const gridColor = () => isDark ? 'rgba(255,255,255,.06)' : 'rgba(67,97,238,.06)';
+  const tickColor = () => isDark ? '#475569' : '#94a3b8';
+
+  // Line chart
+  chartLive = new Chart(document.getElementById('chart-live'), {
+    type:'line',
+    data:{labels:chartLabels,datasets:[{label:'Vehicles',data:chartData,borderColor:'#4361ee',backgroundColor:'rgba(67,97,238,.1)',fill:true,tension:.4,pointRadius:3,pointHoverRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10},maxTicksLimit:6}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10}}}}}
+  });
+
+  // Pie
+  chartPie = new Chart(document.getElementById('chart-pie'), {
+    type:'doughnut',
+    data:{labels:['Low','Medium','High'],datasets:[{data:[45,35,20],backgroundColor:['#06d6a0','#fb8500','#f72585'],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:isDark?'#94a3b8':'#64748b',font:{size:11},padding:16}}}}
+  });
+
+  // Bar
+  const hours = ['06','07','08','09','10','11','12','13','14'];
+  chartBar = new Chart(document.getElementById('chart-bar'), {
+    type:'bar',
+    data:{labels:hours.map(h=>h+':00'),datasets:[{label:'Vehicles/hr',data:hours.map(()=>r(600,2000)),backgroundColor:'rgba(67,97,238,.7)',borderRadius:6,hoverBackgroundColor:'#4361ee'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10}}}}}
+  });
+
+  // Response time
+  chartResp = new Chart(document.getElementById('chart-resp'), {
+    type:'bar',
+    data:{labels:['Ambulance','Patrol','Fire','Medical'],datasets:[
+      {label:'This Month',data:[8.4,6.2,10.1,7.8],backgroundColor:'rgba(67,97,238,.8)',borderRadius:4},
+      {label:'Last Month',data:[11.2,9.4,13.7,10.2],backgroundColor:'rgba(67,97,238,.2)',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:isDark?'#94a3b8':'#64748b',font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{color:tickColor(),font:{size:10}}},y:{grid:{color:gridColor()},ticks:{color:tickColor(),font:{size:10}}}}}
+  });
+}
+
+function updateLiveChart() {
+  if (!chartLive) return;
+  chartLabels.push(new Date().toLocaleTimeString('en-IN',{hour12:false}));
+  chartData.push(r(600,1600));
+  if (chartLabels.length > 20) { chartLabels.shift(); chartData.shift(); }
+  chartLive.update('none');
+  if (chartLive2) {
+    chartLive2.data.labels = [...chartLabels];
+    chartLive2.data.datasets[0].data = [...chartData];
+    chartLive2.update('none');
+  }
+}
+
+// ══════════════════════════════════════════
+//  LIVE TRAFFIC PAGE
+// ══════════════════════════════════════════
+function initLiveTrafficCharts() {
+  chartLive2 = new Chart(document.getElementById('chart-live2'), {
+    type:'line',
+    data:{labels:[...chartLabels],datasets:[{label:'Vehicles',data:[...chartData],borderColor:'#4361ee',backgroundColor:'rgba(67,97,238,.1)',fill:true,tension:.4,pointRadius:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#94a3b8',maxTicksLimit:6},grid:{color:'rgba(67,97,238,.06)'}},y:{ticks:{font:{size:10},color:'#94a3b8'},grid:{color:'rgba(67,97,238,.06)'}}}}
+  });
+  renderZoneBars();
+  renderTrafficFeed();
+}
+
+function renderZoneBars() {
+  const el = document.getElementById('zone-bars');
+  if (!el) return;
+  el.innerHTML = ZONES.map(z => {
+    const pct = r(15,90);
+    const col = pct > 70 ? '#f72585' : pct > 45 ? '#fb8500' : '#06d6a0';
+    return `<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px;"><span>${z}</span><span style="color:${col}">${pct}%</span></div>
+      <div style="height:8px;background:var(--surface2);border-radius:99px;border:1px solid var(--border);overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${col};border-radius:99px;transition:width .5s;"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTrafficFeed() {
+  const el = document.getElementById('traffic-feed-tbody');
+  if (!el) return;
+  el.innerHTML = ZONES.map(z => {
+    const v = r(200,900), spd = r(25,75);
+    const cong = v > 700 ? '<span class="tag tag-red">HIGH</span>' : v > 450 ? '<span class="tag tag-amber">MED</span>' : '<span class="tag tag-green">LOW</span>';
+    const sig = ['🟢 Green','🔴 Red','🟡 Yellow'][r(0,2)];
+    return `<tr><td>${z.split(' ')[0]}</td><td>${z}</td><td style="font-weight:700;color:var(--blue)">${v}</td><td>${spd} km/h</td><td>${cong}</td><td>${sig}</td><td>${new Date().toLocaleTimeString('en-IN',{hour12:false})}</td></tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  MAP PAGE
+// ══════════════════════════════════════════
+function initMapPage() {
+  updateMapBlips();
+  renderMapIncidents();
+  renderRoutes();
+}
+
+function updateMapBlips() {
+  blips.forEach(b=>b.remove()); blips=[];
+  const map = document.getElementById('map-mock');
+  if (!map) return;
+  for (let i=0;i<32;i++) blips.push(mkBlip(map,'car',r(3,97),r(3,97)));
+  [[22,32],[55,70],[75,25],[42,55]].forEach(([x,y])=>blips.push(mkBlip(map,'amb',x,y,'🚑',ZONES[r(0,3)])));
+  [[30,85],[68,12],[85,60],[10,55],[50,25],[72,78]].forEach(([x,y])=>blips.push(mkBlip(map,'patrol',x,y,'🚔',ZONES[r(4,7)])));
+  [[40,18],[64,62]].forEach(([x,y])=>blips.push(mkBlip(map,'incident',x,y,'⚠️','Accident Detected')));
+}
+
+function mkBlip(map, type, x, y, icon='', label='') {
+  const b = document.createElement('div');
+  b.className = 'map-blip '+type;
+  b.style.left=x+'%'; b.style.top=y+'%';
+  if (label) {
+    b.title = label;
+    b.addEventListener('mouseenter', () => {
+      const tt = document.getElementById('map-tooltip');
+      tt.innerHTML = `<strong>${icon} ${type.toUpperCase()}</strong><br>${label}<br><small>Lat: ${(19.0+Math.random()).toFixed(4)}, Lng: ${(72.8+Math.random()).toFixed(4)}</small>`;
+      tt.style.display='block';
+      tt.style.left=(x+2)+'%'; tt.style.top=(y-12)+'%';
+    });
+    b.addEventListener('mouseleave',()=>{ document.getElementById('map-tooltip').style.display='none'; });
+  }
+  map.appendChild(b); return b;
+}
+
+function renderMapIncidents() {
+  const el = document.getElementById('map-inc-tbody');
+  if (!el) return;
+  el.innerHTML = INCIDENTS.filter(i=>i.st!=='Resolved').map(i => {
+    const sTag = i.sev==='HIGH'?'tag-red':i.sev==='MED'?'tag-amber':'tag-green';
+    const stTag = i.st==='Active'?'tag-red':i.st==='Dispatched'?'tag-amber':'tag-blue';
+    return `<tr>
+      <td>${i.type}</td><td>${i.loc}</td>
+      <td><span class="tag ${sTag}">${i.sev}</span></td>
+      <td><span class="tag ${stTag}">${i.st}</span></td>
+      <td><button class="btn btn-primary btn-sm" onclick="openModal('dispatch-modal');toast('🎯 Targeting ${i.loc}')">Dispatch</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderRoutes() {
+  const el = document.getElementById('route-list');
+  if (!el) return;
+  el.innerHTML = AMB_DATA.filter(a=>a.st==='enroute').map(a => `
+    <div style="padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);">
+      <div style="font-weight:700;color:var(--text);margin-bottom:4px;">🚑 ${a.id} → ${a.dest}</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">ETA: <strong style="color:var(--green)">${a.eta}</strong> · Driver: ${a.driver}</div>
+      <div class="eta-bar"><div class="eta-fill" style="width:${r(30,80)}%"></div></div>
+    </div>
+  `).join('');
+}
+
+function toggleHeatmap() {
+  heatmapOn = !heatmapOn;
+  document.getElementById('heatmap-lbl').textContent = heatmapOn ? 'Hide Heatmap' : 'Show Heatmap';
+  const map = document.getElementById('map-mock');
+  document.querySelectorAll('.heatmap-cell').forEach(c=>c.remove());
+  if (heatmapOn) {
+    for (let i=0;i<12;i++) {
+      const h = document.createElement('div');
+      h.className='heatmap-cell';
+      h.style.cssText=`left:${r(5,90)}%;top:${r(5,90)}%;width:${r(60,120)}px;height:${r(60,120)}px;background:radial-gradient(circle,rgba(247,37,133,.35),transparent);transform:translate(-50%,-50%);`;
+      map.appendChild(h);
+    }
+    toast('🔥 Heatmap overlay enabled');
+  } else { toast('🔥 Heatmap hidden'); }
+}
+
+function centerMap() { toast('📍 Map centered on city centre'); updateMapBlips(); }
+
+// ══════════════════════════════════════════
+//  ALERTS PAGE
+// ══════════════════════════════════════════
+function renderAlerts() {
+  const el = document.getElementById('active-alerts');
+  if (!el) return;
+  const active = INCIDENTS.filter(i=>i.st!=='Resolved');
+  el.innerHTML = active.map((i,idx) => {
+    const sev = i.sev==='HIGH'?'tag-red':i.sev==='MED'?'tag-amber':'tag-blue';
+    const bg = i.sev==='HIGH'?'var(--red-lt)':'var(--amber-lt)';
+    return `<div style="padding:14px;border-radius:12px;background:${bg};border:1px solid;border-color:${i.sev==='HIGH'?'var(--red)':'var(--amber)'};display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div style="font-size:24px;">${i.sev==='HIGH'?'🚨':'⚠️'}</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:2px;">${i.type} — ${i.loc}</div>
+        <div style="font-size:12px;color:var(--text2);">Reported: ${i.time} · <span class="tag ${sev}">${i.sev}</span></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-danger btn-sm" onclick="openModal('dispatch-modal');toast('🚑 Dispatching to ${i.loc}')">🚑 Dispatch</button>
+        <button class="btn btn-primary btn-sm" onclick="acknowledgeAlert(${idx})">✓ Acknowledge</button>
+        <button class="btn btn-outline btn-sm" onclick="toast('📝 Incident #${idx+1} noted')">📝 Log</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  const hist = document.getElementById('inc-history');
+  if (hist) {
+    hist.innerHTML = INCIDENTS.map(i => {
+      const sev = i.sev==='HIGH'?'tag-red':i.sev==='MED'?'tag-amber':'tag-green';
+      const stTag = i.st==='Resolved'?'tag-green':i.st==='Active'?'tag-red':'tag-amber';
+      const ico = {Accident:'💥',Congestion:'🚦',Breakdown:'🔧','Signal Fault':'🚦',Flooding:'🌊','Wrong Way':'⚠️'}[i.type]||'⚠️';
+      return `<div class="incident-item">
+        <div class="inc-ico" style="background:var(${i.sev==='HIGH'?'--red-lt':i.sev==='MED'?'--amber-lt':'--green-lt'})">${ico}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;color:var(--text);font-size:13px;">${i.type} — ${i.loc}</div>
+          <div class="inc-time">${i.time} today · <span class="tag ${sev}">${i.sev}</span> · <span class="tag ${stTag}">${i.st}</span></div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn btn-outline btn-sm" onclick="toast('📄 Report downloaded')">📄</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function acknowledgeAlert(idx) {
+  INCIDENTS[idx].st = 'Acknowledged';
+  renderAlerts();
+  toast('✓ Incident acknowledged and logged');
+}
+
+function markAllRead() {
+  INCIDENTS.forEach(i=>{ if(i.st==='Active') i.st='Monitoring'; });
+  renderAlerts();
+  alertCount = 0;
+  document.getElementById('alert-badge').textContent = '0';
+  document.getElementById('notif-dot').style.display='none';
+  toast('✅ All alerts acknowledged');
+}
+
+function triggerAlert() {
+  const types = ['Accident','Wrong-Way Driver','Signal Override','Road Flooding'];
+  const t = types[r(0,types.length-1)];
+  const loc = ZONES[r(0,ZONES.length-1)];
+  INCIDENTS.unshift({type:t,loc:loc,sev:'HIGH',st:'Active',time:new Date().toLocaleTimeString('en-IN',{hour12:false})});
+  incidentCount++;
+  alertCount++;
+  setVal('k-inc', incidentCount);
+  document.getElementById('alert-badge').textContent = alertCount;
+  document.getElementById('notif-dot').style.display='block';
+  showAlertPopup(t, loc);
+  renderAlerts();
+  notifications.unshift({msg:`🚨 ${t} at ${loc}`,time:new Date().toLocaleTimeString('en-IN',{hour12:false}),type:'high'});
+}
+
+// ══════════════════════════════════════════
+//  ALERT POPUP
+// ══════════════════════════════════════════
+let popupTimer;
+function showAlertPopup(type, loc) {
+  document.getElementById('alert-popup-title').textContent = `${type} Detected!`;
+  document.getElementById('alert-popup-sub').textContent = `${loc} · Severity: HIGH`;
+  document.getElementById('alert-popup-detail').textContent = `AI confidence: ${r(88,98)}.${r(0,9)}% · Emergency response required`;
+  document.getElementById('alert-popup').style.display='block';
+  clearTimeout(popupTimer);
+  popupTimer = setTimeout(closeAlertPopup, 12000);
+}
+
+function closeAlertPopup() { document.getElementById('alert-popup').style.display='none'; }
+function acceptAlert() { closeAlertPopup(); toast('✓ Alert accepted and logged'); }
+function dispatchAmbulance() { closeAlertPopup(); openModal('dispatch-modal'); }
+
+// ══════════════════════════════════════════
+//  AMBULANCE TABLE
+// ══════════════════════════════════════════
+const AMB_LOCS_RAND = ['NH-48 Km 22','Ring Rd S14','City Hosp','Sector 9','East Rd','Market Ave','Airport Rd','Central Hub'];
+
+function renderAmbulances() {
+  const el = document.getElementById('amb-tbody');
+  if (!el) return;
+  let enroute=0, avail=0;
+  el.innerHTML = AMB_DATA.map(a => {
+    const spd = a.st==='standby' ? 0 : r(45,95);
+    const loc = a.st==='enroute' ? AMB_LOCS_RAND[r(0,7)] : a.loc;
+    a.st==='enroute' ? enroute++ : avail++;
+    const stClass = a.st==='enroute'?'tag-red':a.st==='standby'?'tag-green':'tag-amber';
+    return `<tr>
+      <td style="font-weight:700;color:var(--red)">${a.id}</td>
+      <td>${a.driver}</td>
+      <td>${loc}</td>
+      <td style="color:var(--amber);font-weight:600">${spd} km/h</td>
+      <td style="color:var(--text2)">${a.dest}</td>
+      <td style="color:var(--green);font-weight:600">${a.eta}</td>
+      <td><span class="tag ${stClass}">${a.st.toUpperCase()}</span></td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-primary btn-sm" onclick="toast('📡 ${a.id} GPS updated')">📡</button>
+          <button class="btn btn-outline btn-sm" onclick="openModal('dispatch-modal')">🔀</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  setVal('amb-avail', avail);
+  setVal('amb-active', enroute);
+  setVal('amb-speed', r(50,90));
+}
+
+// ══════════════════════════════════════════
+//  PATROL TABLE
+// ══════════════════════════════════════════
+function renderPatrol() {
+  const el = document.getElementById('patrol-tbody');
+  if (!el) return;
+  el.innerHTML = PATROL_DATA.map(p => {
+    const spd = p.st==='standby' ? 0 : r(20,80);
+    const stClass = p.st==='patrol'?'tag-blue':p.st==='responding'?'tag-red':'tag-green';
+    return `<tr>
+      <td style="font-weight:700;color:var(--amber)">${p.id}</td>
+      <td>${p.officer}</td>
+      <td>${p.zone}</td>
+      <td>${p.loc}</td>
+      <td style="color:var(--blue);font-weight:600">${spd} km/h</td>
+      <td><span class="tag ${stClass}">${p.st.toUpperCase()}</span></td>
+      <td style="color:var(--text2);font-size:11px;">${p.assign}</td>
+      <td>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-primary btn-sm" onclick="toast('📡 ${p.id} contacted')">📡</button>
+          <button class="btn btn-outline btn-sm" onclick="reassignPatrol('${p.id}')">🔀</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function reassignPatrol(id) { toast(`🚔 ${id} re-assigned to incident zone`,'warn'); }
+
+// ══════════════════════════════════════════
+//  CCTV
+// ══════════════════════════════════════════
+function initCCTV() {
+  const grid = document.getElementById('cctv-grid');
+  if (!grid || grid.children.length > 0) return;
+  CAMS.forEach((cam,i) => {
+    const hasAlert = i===2||i===6;
+    const card = document.createElement('div');
+    card.className = 'cctv-card';
+    card.innerHTML = `
+      <div class="cctv-feed">
+        <div class="cctv-bg"></div>
+        <div class="cctv-road-h" style="top:40%"></div>
+        <div class="cctv-road-v" style="left:35%"></div>
+        <div class="cctv-overlay">
+          <div class="cctv-header">
+            <div class="cctv-id">${cam.id}</div>
+            <div class="cctv-rec"></div>
+          </div>
+          <div class="cctv-footer">
+            <div class="cctv-loc">${cam.loc}</div>
+            <div class="cctv-ai">AI ON · ${r(88,99)}%</div>
+          </div>
+        </div>
+        ${hasAlert?`<div class="cctv-alert" style="display:block">⚠ INCIDENT</div>`:''}
+        <div class="cctv-box" style="border-color:#0f0;top:${r(20,50)}%;left:${r(10,60)}%;width:40px;height:25px;font-size:7px;">CAR</div>
+        <div class="cctv-box" style="border-color:#0ff;top:${r(30,60)}%;left:${r(30,70)}%;width:30px;height:18px;font-size:7px;">VAN</div>
+        ${hasAlert?`<div class="cctv-box" style="border-color:#f72585;top:35%;left:20%;width:50px;height:30px;font-size:7px;animation:blink 1s infinite;">INCIDENT</div>`:''}
+      </div>`;
+    card.onclick = () => {
+      document.getElementById('cctv-modal-title').textContent = `${cam.id} — ${cam.loc}`;
+      document.getElementById('cctv-modal-id').textContent = cam.id;
+      document.getElementById('cctv-modal-stats').textContent = `Vehicles detected: ${r(5,20)} | Speed avg: ${r(35,75)} km/h`;
+      openModal('cctv-modal');
+    };
+    grid.appendChild(card);
+  });
+
+  // Animate cars in CCTV feeds
+  cctvInt = setInterval(() => {
+    document.querySelectorAll('.cctv-car').forEach(c => {
+      c.style.left = r(5,85)+'%'; c.style.top = r(35,65)+'%';
+    });
+  }, 2000);
+}
+
+// ══════════════════════════════════════════
+//  AI PAGE
+// ══════════════════════════════════════════
+function initAI() {
+  // Prediction bars
+  const bars = document.getElementById('ai-bars');
+  if (bars) {
+    const zones = ['NH-48 Junction','Ring Road S14','MG Road Crossing','Central Ave','Airport Rd'];
+    bars.innerHTML = zones.map(z => {
+      const pct = r(20,95);
+      const col = pct > 70 ? '#f72585' : pct > 45 ? '#fb8500' : '#06d6a0';
+      return `<div class="ai-bar-wrap">
+        <div class="ai-bar-label"><span>${z}</span><span style="color:${col}">${pct}% congestion</span></div>
+        <div class="ai-bar-track"><div class="ai-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Model stats
+  const ms = document.getElementById('ai-model-stats');
+  if (ms) {
+    ms.innerHTML = [
+      {l:'Vehicle Detection',v:96.8},{l:'Incident Detection',v:94.2},{l:'Speed Estimation',v:91.5},{l:'Crowd Density',v:88.7}
+    ].map(m=>`
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;"><span>${m.l}</span><span style="color:var(--blue)">${m.v}%</span></div>
+      <div style="height:5px;background:var(--surface2);border-radius:99px;border:1px solid var(--border);overflow:hidden;margin-bottom:8px;"><div style="width:${m.v}%;height:100%;background:var(--blue);border-radius:99px;"></div></div>
+    `).join('');
+  }
+
+  // Accident-prone zones
+  const az = document.getElementById('ai-zones');
+  if (az) {
+    az.innerHTML = [
+      {zone:'NH-48 Flyover',risk:89,reason:'High speed + narrow lanes'},
+      {zone:'Ring Rd S14 Cross',risk:76,reason:'Signal timing issue'},
+      {zone:'MG Road + Central',risk:71,reason:'Pedestrian overload'},
+      {zone:'Airport Entry',risk:55,reason:'Merging traffic'},
+    ].map(z=>`
+      <div class="ai-zone-card">
+        <div class="ai-zone-ico" style="background:${z.risk>80?'var(--red-lt)':z.risk>65?'var(--amber-lt)':'var(--green-lt)'}">${z.risk>80?'🔴':z.risk>65?'🟡':'🟢'}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:13px;color:var(--text);">${z.zone}</div>
+          <div style="font-size:11px;color:var(--text2);">${z.reason}</div>
+        </div>
+        <div style="font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:${z.risk>80?'var(--red)':z.risk>65?'var(--amber)':'var(--green)'};">${z.risk}%</div>
+      </div>
+    `).join('');
+  }
+
+  // Weather
+  const aw = document.getElementById('ai-weather');
+  if (aw) {
+    aw.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        ${[{icon:'☀️',label:'Clear',impact:'+5%'},{icon:'🌧️',label:'Rain',impact:'+42%'},{icon:'🌫️',label:'Fog',impact:'+28%'},{icon:'⛈️',label:'Storm',impact:'+67%'}].map(w=>`
+          <div style="padding:12px;border:1px solid var(--border);border-radius:10px;text-align:center;background:var(--surface2);">
+            <div style="font-size:24px;margin-bottom:4px;">${w.icon}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text);">${w.label}</div>
+            <div style="font-size:11px;color:var(--text2);">Congestion ${w.impact}</div>
+          </div>`).join('')}
+      </div>
+      <div style="padding:12px;background:var(--amber-lt);border-radius:10px;border:1px solid var(--amber);font-size:12px;color:#b45309;font-weight:500;">
+        🌤️ Current: Partly cloudy · 28°C · Visibility: Good · Predicted impact: <strong>+12%</strong> congestion
+      </div>
+      <div style="margin-top:10px;padding:12px;background:var(--blue-lt);border-radius:10px;font-size:12px;color:var(--blue);font-weight:500;">
+        💡 Next 3 hours: Light rain expected at 14:00. Pre-emptively adjust signal timings at Ring Road intersections.
+      </div>`;
+  }
+}
+
+// ══════════════════════════════════════════
+//  ANALYTICS
+// ══════════════════════════════════════════
+function initAnalyticsCharts() {
+  chartA1 = new Chart(document.getElementById('chart-analytics1'), {
+    type:'line',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets:[{label:'Incidents',data:[3,5,2,7,4,8,3],borderColor:'#f72585',backgroundColor:'rgba(247,37,133,.1)',fill:true,tension:.4,pointRadius:4}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}},y:{grid:{color:'rgba(67,97,238,.06)'},ticks:{color:'#94a3b8',font:{size:10}}}}}
+  });
+  chartA2 = new Chart(document.getElementById('chart-analytics2'), {
+    type:'doughnut',
+    data:{labels:['Cars','Trucks','Bikes','Buses','Auto'],datasets:[{data:[52,14,20,8,6],backgroundColor:['#4361ee','#fb8500','#06d6a0','#f72585','#7b2d8b'],borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:isDark?'#94a3b8':'#64748b',font:{size:11}}}}}
+  });
+}
+
+function renderAnalytics() {
+  const el = document.getElementById('analytics-tbody');
+  if (!el) return;
+  el.innerHTML = ZONES.map(z=>{
+    const inc = r(1,12), sev = ['LOW','MED','HIGH'][r(0,2)], resp = r(4,15);
+    const risk = inc>8?'tag-red':inc>5?'tag-amber':'tag-green';
+    return `<tr>
+      <td>${z}</td>
+      <td style="font-weight:700;color:var(--blue)">${inc}</td>
+      <td><span class="tag ${sev==='HIGH'?'tag-red':sev==='MED'?'tag-amber':'tag-green'}">${sev}</span></td>
+      <td>${resp} min</td>
+      <td>${['Accident','Congestion','Breakdown'][r(0,2)]}</td>
+      <td><span class="tag ${risk}">${inc>8?'HIGH':inc>5?'MEDIUM':'LOW'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateAnalytics() {
+  const range = document.getElementById('analytics-range').value;
+  const mult = range==='Last 7 Days'?7:range==='Last 30 Days'?30:1;
+  setVal('a-total', (r(800,1200)*mult).toLocaleString());
+  setVal('a-inc', r(3,15)*Math.ceil(mult/5));
+  setVal('a-resp', (r(60,140)/10).toFixed(1)+' min');
+  setVal('a-disp', r(5,20)*Math.ceil(mult/5));
+  toast(`📊 Analytics updated for ${range}`);
+}
+
+// ══════════════════════════════════════════
+//  SETTINGS
+// ══════════════════════════════════════════
+function saveSettings() { toast('💾 Settings saved successfully'); }
+
+function confirmClear() {
+  if (confirm('⚠️ Clear ALL traffic data? This cannot be undone.')) {
+    toast('🗑️ All data cleared','warn');
+  }
+}
+
+// ══════════════════════════════════════════
+//  DARK MODE
+// ══════════════════════════════════════════
+function toggleDarkMode() {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark?'dark':'light');
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light' : 'Dark';
+  const dt = document.getElementById('dark-toggle');
+  if (dt) dt.checked = isDark;
+  toast(isDark ? '🌙 Dark mode enabled' : '☀️ Light mode enabled');
+}
+
+// ══════════════════════════════════════════
+//  NOTIFICATIONS
+// ══════════════════════════════════════════
+function loadNotifications() {
+  const el = document.getElementById('notif-list');
+  if (!el) return;
+  if (!notifications.length) notifications = [
+    {msg:'🚨 Accident detected — NH-48 @ Km 22',time:'10:45',type:'high'},
+    {msg:'🚦 Heavy congestion — Ring Road S14',time:'10:30',type:'med'},
+    {msg:'🚑 AMB-001 dispatched to incident',time:'10:14',type:'low'},
+    {msg:'⚠️ Signal fault — Sector 9',time:'09:55',type:'med'},
+    {msg:'✅ Incident cleared — MG Road Jct',time:'09:30',type:'low'},
+  ];
+  el.innerHTML = notifications.map(n=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);">
+      <div style="width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;background:${n.type==='high'?'var(--red)':n.type==='med'?'var(--amber)':'var(--green)'};"></div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">${n.msg}</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">${n.time} today</div></div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  EXPORT
+// ══════════════════════════════════════════
+function doExport(fmt) {
+  closeModal('export-modal');
+  const type = document.querySelector('input[name="exp"]:checked')?.value || 'incidents';
+  if (fmt === 'pdf') {
+    generatePDF(type);
+  } else {
+    generateCSV(type);
+  }
+}
+
+function generatePDF(type) {
+  const win = window.open('', '_blank');
+  const titles = {incidents:'Incident Report',traffic:'Traffic Analytics',fleet:'Fleet Status Report'};
+  const now = new Date().toLocaleString('en-IN');
+  let body = '';
+
+  if (type==='incidents') {
+    body = `<table border="1" style="border-collapse:collapse;width:100%;font-size:12px;">
+      <tr style="background:#4361ee;color:white;"><th>Type</th><th>Location</th><th>Severity</th><th>Status</th><th>Time</th></tr>
+      ${INCIDENTS.map(i=>`<tr><td>${i.type}</td><td>${i.loc}</td><td>${i.sev}</td><td>${i.st}</td><td>${i.time}</td></tr>`).join('')}
+    </table>`;
+  } else if (type==='fleet') {
+    body = `<table border="1" style="border-collapse:collapse;width:100%;font-size:12px;">
+      <tr style="background:#4361ee;color:white;"><th>Unit</th><th>Driver</th><th>Location</th><th>Status</th></tr>
+      ${AMB_DATA.map(a=>`<tr><td>${a.id}</td><td>${a.driver}</td><td>${a.loc}</td><td>${a.st}</td></tr>`).join('')}
+    </table>`;
+  } else {
+    body = `<table border="1" style="border-collapse:collapse;width:100%;font-size:12px;">
+      <tr style="background:#4361ee;color:white;"><th>Zone</th><th>Vehicles</th><th>Congestion</th><th>Avg Speed</th></tr>
+      ${ZONES.map(z=>`<tr><td>${z}</td><td>${r(200,900)}</td><td>${r(20,80)}%</td><td>${r(25,75)} km/h</td></tr>`).join('')}
+    </table>`;
+  }
+
+  win.document.write(`<!DOCTYPE html><html><head><title>${titles[type]}</title>
+  <style>body{font-family:Arial,sans-serif;padding:30px;color:#1e2a4a;}
+  h1{color:#4361ee;margin-bottom:4px;}
+  .meta{color:#64748b;font-size:12px;margin-bottom:20px;}
+  table{border-collapse:collapse;width:100%;}th,td{padding:8px 12px;text-align:left;border:1px solid #e2e8f8;}
+  tr:nth-child(even){background:#f7f9ff;}</style></head>
+  <body>
+  <h1>🚦 TrafficAI Government Control System</h1>
+  <div class="meta">Report: ${titles[type]} · Generated: ${now} · Ministry of Smart Cities</div>
+  ${body}
+  <div style="margin-top:20px;font-size:11px;color:#94a3b8;">Confidential Government Document · TrafficAI v3.1</div>
+  <script>window.onload=()=>{window.print()}<\/script>
+  </body></html>`);
+  win.document.close();
+  toast('📄 PDF report opened — use browser Print to save');
+}
+
+function generateCSV(type) {
+  let csv = '';
+  if (type==='incidents') {
+    csv = 'Type,Location,Severity,Status,Time\n' + INCIDENTS.map(i=>`${i.type},${i.loc},${i.sev},${i.st},${i.time}`).join('\n');
+  } else if (type==='fleet') {
+    csv = 'Unit,Driver,Location,Destination,Status\n' + AMB_DATA.map(a=>`${a.id},${a.driver},${a.loc},${a.dest},${a.st}`).join('\n');
+  } else {
+    csv = 'Zone,Vehicles,Congestion,Avg Speed\n' + ZONES.map(z=>`${z},${r(200,900)},${r(20,80)}%,${r(25,75)} km/h`).join('\n');
+  }
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `trafficai_${type}_${Date.now()}.csv`;
+  a.click();
+  toast('📋 CSV exported and downloaded');
+}
+
+function selectExport(n) {
+  document.querySelectorAll('[id^="exp-opt-"]').forEach(el=>{
+    el.style.borderColor='var(--border)';
+  });
+  document.getElementById('exp-opt-'+n).style.borderColor='var(--blue)';
+}
+
+// ══════════════════════════════════════════
+//  CONTROL ROOM
+// ══════════════════════════════════════════
+function toggleControlRoom() {
+  const v = document.getElementById('ctrl-room-view');
+  v.classList.toggle('open');
+  if (v.classList.contains('open')) {
+    initCRMap();
+    renderCRAlerts();
+    toast('🖥️ Control Room view activated');
+  }
+}
+
+function initCRMap() {
+  const map = document.getElementById('cr-map');
+  if (!map || map.querySelector('.cr-blip')) return;
+  // Add some blips
+  [[25,30,'red'],[60,55,'red'],[40,75,'#4361ee'],[75,20,'#4361ee'],[55,40,'rgba(67,97,238,.5)']].forEach(([x,y,col])=>{
+    const b = document.createElement('div');
+    b.className='cr-blip';
+    b.style.cssText=`position:absolute;left:${x}%;top:${y}%;width:10px;height:10px;border-radius:50%;background:${col};transform:translate(-50%,-50%);box-shadow:0 0 0 3px ${col}44;`;
+    if (col==='red') b.style.animation='blink 1s infinite';
+    map.appendChild(b);
+  });
+}
+
+function renderCRAlerts() {
+  const el = document.getElementById('cr-alerts');
+  if (!el) return;
+  el.innerHTML = INCIDENTS.slice(0,5).map(i=>`
+    <div style="padding:8px;border-radius:8px;background:rgba(${i.sev==='HIGH'?'247,37,133':'251,133,0'},.1);border:1px solid rgba(${i.sev==='HIGH'?'247,37,133':'251,133,0'},.2);margin-bottom:6px;">
+      <div style="font-size:11px;font-weight:700;color:${i.sev==='HIGH'?'#ff4d8d':'#ffa040'}">${i.type} — ${i.loc}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.4);">${i.time} · ${i.st}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  AUTO-ALERT SIMULATION
+// ══════════════════════════════════════════
+let autoAlertCount = 0;
+function maybeAlert() {
+  autoAlertCount++;
+  if (autoAlertCount % 8 === 0) { // every ~24s
+    triggerAlert();
+  }
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+function initApp() {
+  startClock();
+  initOverviewCharts();
+  updateKPIs();
+  renderAmbulances();
+  renderPatrol();
+
+  // Initial alert popup after delay
+  setTimeout(() => showAlertPopup('Accident', 'NH-48 @ Km 22'), 2000);
+
+  dataInt = setInterval(() => {
+    updateKPIs();
+    updateLiveChart();
+    renderAmbulances();
+    renderPatrol();
+    renderZoneBars();
+    renderTrafficFeed();
+    maybeAlert();
+
+    // Update CR stats
+    setVal('cr-amb', r(1,4));
+    setVal('cr-inc', incidentCount);
+  }, 3000);
+
+  mapInt = setInterval(() => {
+    updateMapBlips();
+    renderRoutes();
+  }, 4000);
+
+  alertInt = setInterval(() => {
+    notifications.unshift({
+      msg:`🚦 Traffic update — ${ZONES[r(0,ZONES.length-1)]}`,
+      time:new Date().toLocaleTimeString('en-IN',{hour12:false}),
+      type:'low'
+    });
+  }, 8000);
+
+  // Show notif dot
+  setTimeout(()=>{ document.getElementById('notif-dot').style.display='block'; }, 5000);
+}
+</script>
+</body>
+</html>
